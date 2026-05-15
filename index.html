@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Una lettera da Hogwarts</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .scene {
+      background: #0a0a1a;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stars {
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--d) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    .envelope-wrap {
+      position: relative;
+      animation: floatIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      opacity: 0;
+      transform: translateY(-80px) rotate(-4deg);
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(-80px) rotate(-4deg); }
+      60% { opacity: 1; transform: translateY(10px) rotate(1deg); }
+      100% { opacity: 1; transform: translateY(0px) rotate(0deg); }
+    }
+
+    .envelope {
+      width: min(320px, 90vw);
+      background: #f5ede0;
+      border: 2px solid #c8a96e;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(200,169,110,0.08);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .envelope:active { transform: scale(0.98); }
+
+    .envelope-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .stamp {
+      width: 52px;
+      height: 62px;
+      border: 2px solid #8b6914;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fdf6e3;
+      font-size: 22px;
+      gap: 2px;
+      padding: 4px;
+    }
+
+    .stamp-text {
+      font-size: 7px;
+      color: #8b6914;
+      font-family: 'IM Fell English', serif;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .wax-seal {
+      width: 56px;
+      height: 56px;
+      background: radial-gradient(circle at 40% 35%, #cc2200, #7a0000);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #f5c842;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,200,100,0.3);
+      border: 1px solid #5a0000;
+      animation: sealGlow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes sealGlow {
+      0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 0px rgba(200,50,0,0); }
+      50% { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 14px rgba(200,50,0,0.6); }
+    }
+
+    .address-block {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      color: #2c1a00;
+      font-size: 13.5px;
+      line-height: 1.7;
+      text-align: center;
+      border-top: 1px solid #c8a96e;
+      padding-top: 12px;
+    }
+
+    .address-block .name {
+      font-size: 17px;
+      font-style: normal;
+      font-weight: bold;
+      color: #1a0a00;
+    }
+
+    .open-hint {
+      text-align: center;
+      margin-top: 12px;
+      font-family: 'IM Fell English', serif;
+      font-size: 11px;
+      color: #8b6914;
+      font-style: italic;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+    .letter-container {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 20, 0.92);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      animation: fadeIn 0.4s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .letter-container.open { display: flex; }
+
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .letter {
+      background: #fdf6e3;
+      max-width: 480px;
+      width: 100%;
+      max-height: 90dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 40px 36px;
+      border: 1px solid #c8a96e;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+      position: relative;
+      animation: letterUnfold 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+      transform-origin: top center;
+    }
+
+    @media (max-width: 400px) {
+      .letter { padding: 32px 20px; }
+    }
+
+    @keyframes letterUnfold {
+      from { transform: scaleY(0); opacity: 0; }
+      to { transform: scaleY(1); opacity: 1; }
+    }
+
+    .letter-crest {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .crest-svg {
+      width: 72px;
+      height: 72px;
+      display: inline-block;
+    }
+
+    .hogwarts-title {
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: 22px;
+      color: #5a3a00;
+      letter-spacing: 1px;
+      margin-top: 6px;
+    }
+
+    .letter-divider {
+      border: none;
+      border-top: 1px solid #c8a96e;
+      margin: 16px 0;
+    }
+
+    .letter-body {
+      font-family: 'IM Fell English', serif;
+      font-size: 15px;
+      color: #1a0a00;
+      line-height: 1.85;
+    }
+
+    .letter-body .salutation {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #2c1a00;
+    }
+
+    .letter-body p { margin-bottom: 14px; }
+
+    .platform-highlight {
+      text-align: center;
+      margin: 22px 0;
+      padding: 14px 20px;
+      border: 2px solid #8b2500;
+      background: #fff8e8;
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: 24px;
+      color: #7a0000;
+      letter-spacing: 2px;
+      animation: shimmer 2s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%,100% { background: #fff8e8; }
+      50% { background: #fff0d0; }
+    }
+
+    .signature {
+      margin-top: 24px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: #2c1a00;
+      line-height: 1.6;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px; right: 16px;
+      background: none;
+      border: 1px solid #c8a96e;
+      color: #8b6914;
+      cursor: pointer;
+      font-size: 18px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: sans-serif;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .close-btn:active { background: #f5ede0; }
+
+    .spark {
+      position: absolute;
+      pointer-events: none;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      animation: sparkFly 1s ease-out forwards;
+    }
+
+    @keyframes sparkFly {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">
+  Lettera di ammissione di Hogwarts per Francesca con invito al Binario 9 e 3/4
+</h2>
+
+<div class="scene" id="scene">
+  <div class="stars" id="stars"></div>
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope" onclick="openLetter(event)">
+      <div class="envelope-top">
+        <div class="stamp">
+          <span>🦉</span>
+          <div class="stamp-text">Posta<br>Magica</div>
+        </div>
+        <div class="wax-seal">⚡</div>
+      </div>
+      <div class="address-block">
+        <div class="name">Signorina Francesca</div>
+        <div>La sua stanza</div>
+        <div>Il suo domicilio</div>
+        <div>Mondo dei Babbani</div>
+      </div>
+      <div class="open-hint">— Tocca per aprire —</div>
+    </div>
+  </div>
+</div>
+
+<div class="letter-container" id="letterContainer">
+  <div class="letter">
+    <button class="close-btn" onclick="closeLetter()">✕</button>
+    <div class="letter-crest">
+      <svg class="crest-svg" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="36,4 68,20 68,52 36,68 4,52 4,20" fill="#7a0000" stroke="#c8a96e" stroke-width="1.5"/>
+        <line x1="36" y1="4" x2="36" y2="68" stroke="#c8a96e" stroke-width="0.8"/>
+        <line x1="4" y1="36" x2="68" y2="36" stroke="#c8a96e" stroke-width="0.8"/>
+        <text x="36" y="26" text-anchor="middle" font-size="14" fill="#f5c842">⚡</text>
+        <text x="36" y="58" text-anchor="middle" font-size="9" fill="#f5c842" font-family="serif">H</text>
+        <text x="20" y="44" text-anchor="middle" font-size="10" fill="#f5c842">🦁</text>
+        <text x="52" y="44" text-anchor="middle" font-size="10" fill="#f5c842">🦅</text>
+      </svg>
+      <div class="hogwarts-title">Hogwarts</div>
+    </div>
+    <hr class="letter-divider">
+    <div class="letter-body">
+      <div class="salutation">Cara Francesca,</div>
+      <p>Siamo lieti di informarti che la tua presenza è richiesta con la massima urgenza.</p>
+      <p>Il Consiglio dei Maghi ha deliberato: il tuo treno <strong>sta per partire</strong>. Non vi è tempo da perdere. Presenta il tuo biglietto e recati immediatamente alla stazione di <em>King's Cross</em>.</p>
+      <div class="platform-highlight">Binario 9 e ¾</div>
+      <p>Avvicinati con decisione alla barriera tra il binario 9 e il binario 10. Non fermarti. Non esitare. Il muro è amico di coloro che credono.</p>
+      <p>L'<em>Espresso per Hogwarts</em> ti attende. A bordo troverai tutto ciò di cui hai bisogno per l'anno magico che ti aspetta.</p>
+      <p style="font-style:italic; color:#5a3a00;">Che la magia ti accompagni sempre.</p>
+      <div class="signature">
+        Con i più alti auspici,<br><br>
+        <strong>Minerva McGranitt</strong><br>
+        <em>Vicepreside, Hogwarts</em><br>
+        Scuola di Magia e Stregoneria
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s`;
+    starsEl.appendChild(s);
+  }
+
+  function spawnSparks(x, y) {
+    const scene = document.getElementById('scene');
+    const colors = ['#f5c842','#ff6b35','#c8a96e','#fff'];
+    for (let i = 0; i < 14; i++) {
+      const sp = document.createElement('div');
+      sp.className = 'spark';
+      const angle = (Math.random() * Math.PI * 2);
+      const dist = 40 + Math.random() * 60;
+      sp.style.cssText = `left:${x}px;top:${y}px;background:${colors[Math.floor(Math.random()*colors.length)]};--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;animation-duration:${(0.6+Math.random()*0.6).toFixed(2)}s`;
+      scene.appendChild(sp);
+      setTimeout(() => sp.remove(), 1200);
+    }
+  }
+
+  function openLetter(e) {
+    const rect = document.getElementById('envelope').getBoundingClientRect();
+    const sceneRect = document.getElementById('scene').getBoundingClientRect();
+    spawnSparks(rect.left - sceneRect.left + rect.width/2, rect.top - sceneRect.top + rect.height/2);
+    setTimeout(() => {
+      document.getElementById('letterContainer').classList.add('open');
+    }, 300);
+  }
+
+  function closeLetter() {
+    document.getElementById('letterContainer').classList.remove('open');
+  }
+</script>
+</body>
+</html>
